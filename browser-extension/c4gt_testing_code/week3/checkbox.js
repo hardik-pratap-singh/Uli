@@ -33,7 +33,6 @@ function funAddCrazy(){
     allCrazy.forEach(element => {
         element.style.display = 'inline';
     });
-    
 }
 
 function funRemoveStupid() {
