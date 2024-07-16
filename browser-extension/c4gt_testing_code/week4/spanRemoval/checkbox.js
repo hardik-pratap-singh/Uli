@@ -1,7 +1,72 @@
-console.log("here")
+let textNodes = []
+let body = document.querySelector("body");
 const iconSrc = './info.svg';
 const iconAlt = 'Icon description';
 const targetWords = ['crazy', 'stupid', 'mad']; // Replace with your list of target words
+
+function checkFalseTextNode(text, actualLengthOfText) {
+    let n = text.length;
+    let totalNewlineAndWhitespaces = 0;
+    for (let i = 0; i < n; i++) {
+        if (text[i] === "\n") {
+            totalNewlineAndWhitespaces += 1;
+        }
+
+        else if (text[i] === " ") {
+            totalNewlineAndWhitespaces += 1;
+        }
+
+    }
+    if (totalNewlineAndWhitespaces === actualLengthOfText) {
+        //False Text Node Confirmed
+        return true;
+    }
+    else {
+        //True Text Node Confirmed
+        return false;
+    }
+}
+
+
+function getAllTextNodes(node) {
+    if (node.nodeType === 3) {
+        //If node.data contains just whitespaces and \n, then its a false text node
+
+        // let whitespaces = (node.data.split(" ").length - 1);
+        // console.log(node.data) ; 
+        if (checkFalseTextNode(node.data, node.length) === false) {
+            textNodes.push({ node: node, parent: node.parentNode });
+        }
+        // textNodes.push({ node: node, parent: node.parentNode });
+        return;
+    }
+
+    let children = Array.from(node.childNodes);
+    for (let i = 0; i < children.length; i++) {
+        getAllTextNodes(children[i]);
+    }
+}
+
+// setTimeout(() => {
+//     getAllTextNodes(body);
+//     console.log(textNodes)
+// }, 0);
+
+getAllTextNodes(body);
+console.log(textNodes)
+
+// for(let i = 0 ; i < textNodes.length ; i++){
+//     console.log(textNodes[i].node.data.length ) ; 
+// }
+
+// let s1 = "\n\n    " ; 
+// console.log(s1.length)
+// for(let i = 0 ; i < s1.length ; i++){
+//     if(s1[i] == "\n"){
+//         console.log("got new line char")
+//     }
+//     console.log(s1[i])
+// }
 
 let checkbox = document.getElementById('injectSVG');
 
@@ -13,49 +78,40 @@ checkbox.addEventListener('change', function () {
     }
 });
 
+
+
 function injectSVG() {
+    for (let i = 0; i < textNodes.length; i++) {
+        let text = textNodes[i];
+        let parentNode = text.parent;
+        let textNode = text.node;
 
-   
+        targetWords.forEach(targetWord => {
+            if (parentNode.innerHTML.includes(targetWord)) {
+                const className = `icon-container-${targetWord}`;
+                const parts = parentNode.innerHTML.split(targetWord);
+                const replacedHTML = parts.join(`${targetWord}<span class="${className}"></span>`);
+                parentNode.innerHTML = replacedHTML
 
-    setTimeout(() => {
-        document.querySelectorAll('*').forEach(element => {
-            targetWords.forEach(targetWord => {
-                // setTimeout(() => {
-                if (element.innerHTML.includes(targetWord)) {
-                    const className = `icon-container-${targetWord}`;
-                    // Split the innerHTML into parts to handle replacements
-                    const parts = element.innerHTML.split(targetWord);
-                    const replacedHTML = parts.join(`${targetWord}<span class="${className}"></span>`);
+                const iconContainers = parentNode.querySelectorAll(`.${className}`);
+                iconContainers.forEach(container => {
+                    const icon = document.createElement('img');
+                    icon.src = iconSrc;
+                    icon.alt = iconAlt;
+                    container.appendChild(icon);
 
-                    // Update the element with the replaced content
-                    element.innerHTML = replacedHTML;
-
-                    // Add icon after each occurrence of the target word
-                    setTimeout(() => {
-                        const iconContainers = element.querySelectorAll(`.${className}`);
-                        iconContainers.forEach(container => {
-                            const icon = document.createElement('img');
-                            icon.classList.add(`img-${targetWord}`)
-                            icon.src = iconSrc;
-                            icon.alt = iconAlt;
-                            container.appendChild(icon);
-                        });
-                    }, 0);
-
-                }
-                // }, 1);
-
-            });
-        });
-    }, 2);
-
-    checkbox.checked = true 
-    
+                });
+            }
+        })
+    }
 }
 
 function removeSVG() {
-    const svgElements = document.querySelectorAll('.img-crazy, .img-stupid, .img-mad');
-    svgElements.forEach(element => {
-        element.parentNode.removeChild(element);
-    });
+    targetWords.forEach(targetWord => {
+        let elements = Array.from(document.querySelectorAll(`.icon-container-${targetWord}`))
+        console.log(elements); 
+        elements.forEach(element => {
+            element.remove(); 
+        })
+    })
 }
