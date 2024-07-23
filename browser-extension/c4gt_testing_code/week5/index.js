@@ -93,10 +93,12 @@ function locateSlur(uliStore, targetWords){
     return uliStore ; //This will return the final uliStore (after appending slurs)
 }
 
-function initializeMutationObserver(uliStore , targetWords, getAllTextNodes , locateSlur) {
+function initializeMutationObserver(uliStore) {
     // Initial run to capture slur words from the current content
-    // getAllTextNodes(document.body);
-    // locateSlur(uliStore, targetWords);
+    // let uliStore = [] ; 
+    const targetWords = ['crazy', 'stupid', 'mad', 'insane']; 
+    getAllTextNodes(document.body , uliStore);
+    locateSlur(uliStore, targetWords);
     // console.log("Initial uliStore:", uliStore);
 
     // Mutation observer to detect changes in the DOM (e.g., new elements added dynamically)
